@@ -58,7 +58,70 @@
 
 <script src="logic.js"></script>
 <script>
-  // App wiring added in Task 5 onward.
+(function () {
+  var HT = window.HueTest;
+
+  var state = {
+    name: '',
+    difficultyKey: 'normal',
+    levelIndex: 0,
+    levels: [],
+    tileErrorGroups: []
+  };
+
+  var screenStart = document.getElementById('screen-start');
+  var screenTest = document.getElementById('screen-test');
+  var screenResult = document.getElementById('screen-result');
+
+  function showScreen(el) {
+    [screenStart, screenTest, screenResult].forEach(function (s) {
+      s.classList.toggle('hidden', s !== el);
+    });
+  }
+
+  document.getElementById('btn-start').addEventListener('click', function () {
+    var name = document.getElementById('input-name').value.trim();
+    if (!name) {
+      document.getElementById('start-error').textContent = '請輸入姓名';
+      return;
+    }
+    document.getElementById('start-error').textContent = '';
+    var difficulty = document.querySelector('input[name="difficulty"]:checked').value;
+
+    state.name = name;
+    state.difficultyKey = difficulty;
+    state.levelIndex = 0;
+    state.levels = [];
+    state.tileErrorGroups = [];
+    for (var i = 0; i < HT.LEVEL_COUNT; i++) {
+      var correctHues = HT.generateLevelHues(i);
+      state.levels.push({ correctHues: correctHues, arrangedHues: HT.shuffleMovable(correctHues) });
+    }
+
+    showScreen(screenTest);
+    renderLevel();
+  });
+
+  function renderLevel() {
+    document.getElementById('level-num').textContent = state.levelIndex + 1;
+    var btn = document.getElementById('btn-next');
+    btn.textContent = state.levelIndex === HT.LEVEL_COUNT - 1 ? '查看結果' : '下一關';
+
+    var level = state.levels[state.levelIndex];
+    var diff = HT.DIFFICULTY[state.difficultyKey];
+    var row = document.getElementById('tile-row');
+    row.innerHTML = '';
+
+    level.arrangedHues.forEach(function (hue, index) {
+      var tile = document.createElement('div');
+      var isFixed = index === 0 || index === HT.TILES_PER_LEVEL - 1;
+      tile.className = 'tile' + (isFixed ? ' fixed' : '');
+      tile.style.background = 'hsl(' + hue + ', ' + diff.saturation + '%, ' + diff.lightness + '%)';
+      tile.dataset.hue = hue;
+      row.appendChild(tile);
+    });
+  }
+})();
 </script>
 </body>
 </html>
