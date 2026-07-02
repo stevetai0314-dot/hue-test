@@ -3,81 +3,109 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>色相辨識測試</title>
+<title>色相辨識測試 | Kiểm Tra Màu Sắc</title>
 <style>
   * { box-sizing: border-box; }
-  body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; margin: 0; padding: 16px; background: #fafafa; color: #222; }
+  body {
+    font-family: -apple-system, "Microsoft JhengHei", sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    padding: 24px 12px;
+    background: linear-gradient(160deg, #eaf4f7 0%, #dcecf1 60%, #d3e6ee 100%);
+    color: #24313f;
+    display: flex;
+    justify-content: center;
+  }
+  .app { width: 100%; max-width: 440px; background: #fff; border-radius: 16px; box-shadow: 0 10px 28px rgba(30,60,80,0.12); padding: 22px 20px; }
   .screen.hidden { display: none; }
-  h1 { font-size: 20px; margin-bottom: 12px; }
-  label { display: block; margin-bottom: 8px; }
-  input[type="text"] { width: 100%; padding: 8px; font-size: 16px; }
-  fieldset { margin-bottom: 12px; border: 1px solid #ddd; border-radius: 6px; }
-  .rules { font-size: 13px; color: #666; line-height: 1.6; }
-  button { padding: 10px 20px; font-size: 15px; border: none; border-radius: 6px; background: #333; color: #fff; margin-top: 8px; }
-  .error-msg { color: #c0392b; font-size: 13px; min-height: 18px; }
-  .progress { text-align: center; font-size: 14px; color: #666; margin-bottom: 12px; }
-  .tile-row { display: flex; gap: 4px; overflow-x: auto; padding: 12px 4px; background: #f0f0f0; border-radius: 8px; -webkit-overflow-scrolling: touch; }
-  .tile { min-width: 44px; height: 64px; border-radius: 6px; flex-shrink: 0; }
-  .tile.fixed { border: 3px solid #333; }
-  .tile:not(.fixed) { cursor: grab; touch-action: none; user-select: none; }
+  h1 { font-size: 21px; margin: 0 0 2px; color: #1c4e63; }
+  .subtitle { font-size: 13px; color: #7c94a3; margin: 0 0 16px; }
+  label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 14px; }
+  .vi { display: block; font-weight: 400; font-size: 12px; color: #8296a4; margin-top: 1px; }
+  input[type="text"] { width: 100%; padding: 10px; font-size: 16px; border: 1px solid #d3dee5; border-radius: 8px; margin-bottom: 14px; }
+  fieldset { margin-bottom: 14px; border: 1px solid #dfe8ed; border-radius: 10px; padding: 10px 12px; }
+  legend { padding: 0 4px; }
+  fieldset label { font-weight: 400; margin-bottom: 6px; }
+  .rules { font-size: 13px; color: #5c707c; line-height: 1.7; background: #f3f8fa; border-radius: 10px; padding: 10px 12px; }
+  .rules .vi { font-size: 12px; margin-top: 6px; color: #8296a4; }
+  button { padding: 12px 18px; font-size: 15px; border: none; border-radius: 10px; background: #1c7d8c; color: #fff; margin-top: 10px; width: 100%; cursor: pointer; transition: opacity .15s ease; }
+  button:active { opacity: .78; }
+  button.btn-secondary { background: #e6edf1; color: #2c3e48; }
+  .error-msg { color: #c0392b; font-size: 13px; min-height: 18px; margin-top: 4px; }
+  .progress { text-align: center; font-size: 14px; color: #5c707c; margin-bottom: 14px; line-height: 1.5; }
+  .tile-row { display: flex; gap: 4px; overflow-x: auto; padding: 12px 4px; background: #f3f8fa; border-radius: 10px; -webkit-overflow-scrolling: touch; }
+  .tile { min-width: 44px; height: 64px; border-radius: 8px; flex-shrink: 0; }
+  .tile.fixed { border: 3px solid #24313f; }
+  .tile:not(.fixed) { cursor: grab; touch-action: none; user-select: none; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
   .tile.dragging { opacity: 0.6; cursor: grabbing; }
-  #result-summary { white-space: pre-line; background: #f0f0f0; padding: 12px; border-radius: 8px; font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
-  #copy-status { font-size: 13px; color: #2e7d32; min-height: 18px; }
-  .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
-  .tab-btn { flex: 1; background: #ddd; color: #333; }
-  .tab-btn.active { background: #333; color: #fff; }
-  .leaderboard-status { font-size: 13px; color: #666; min-height: 18px; margin-bottom: 8px; }
+  #result-summary { white-space: pre-line; background: #f3f8fa; padding: 14px; border-radius: 10px; font-size: 14px; line-height: 1.9; margin-bottom: 12px; }
+  #copy-status { font-size: 13px; color: #1f7a4d; min-height: 18px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+  .tab-btn { flex: 1; background: #e6edf1; color: #2c3e48; margin-top: 0; padding: 10px 4px; }
+  .tab-btn.active { background: #1c7d8c; color: #fff; }
+  .leaderboard-status { font-size: 13px; color: #5c707c; min-height: 18px; margin-bottom: 8px; }
   .leaderboard-list { list-style: none; padding: 0; margin: 0; }
-  .leaderboard-list li { display: flex; align-items: center; gap: 8px; padding: 8px; background: #f0f0f0; border-radius: 6px; margin-bottom: 6px; font-size: 14px; }
-  .leaderboard-list li .rank { font-weight: bold; width: 24px; }
+  .leaderboard-list li { display: flex; align-items: center; gap: 8px; padding: 10px; background: #f3f8fa; border-radius: 10px; margin-bottom: 6px; font-size: 14px; }
+  .leaderboard-list li .rank { font-weight: bold; width: 24px; color: #1c7d8c; }
   .leaderboard-list li .name { flex: 1; }
   .leaderboard-list li .score { width: 50px; text-align: right; }
-  .leaderboard-list li .time { width: 70px; text-align: right; color: #666; }
+  .leaderboard-list li .time { width: 70px; text-align: right; color: #5c707c; }
 </style>
 </head>
 <body>
+<div class="app">
 
 <div id="screen-start" class="screen">
   <h1>色相辨識測試</h1>
-  <label>姓名
-    <input type="text" id="input-name" placeholder="請輸入姓名">
+  <p class="subtitle">Kiểm Tra Nhận Biết Màu Sắc</p>
+  <label>姓名<span class="vi">Họ và tên</span>
+    <input type="text" id="input-name" placeholder="請輸入姓名 / Nhập họ tên">
   </label>
   <fieldset>
-    <legend>難度</legend>
-    <label><input type="radio" name="difficulty" value="normal" checked> 一般</label>
-    <label><input type="radio" name="difficulty" value="hard"> 困難</label>
+    <legend>難度<span class="vi">Độ khó</span></legend>
+    <label><input type="radio" name="difficulty" value="normal" checked> 一般<span class="vi" style="display:inline;margin-left:4px">Bình thường</span></label>
+    <label><input type="radio" name="difficulty" value="hard"> 困難<span class="vi" style="display:inline;margin-left:4px">Khó</span></label>
   </fieldset>
-  <p class="rules">共 8 關，每關把中間 8 塊色塊依顏色漸層順序拖拉排好，頭尾 2 塊（黑框）固定不動。排完按「下一關」即可繼續，不用排到完全正確才能過關。</p>
-  <button id="btn-start">開始測驗</button>
-  <button id="btn-leaderboard" type="button">查看排行榜</button>
+  <p class="rules">
+    共 8 關，每關把中間 8 塊色塊依顏色漸層順序拖拉排好，頭尾 2 塊（黑框）固定不動。排完按「下一關」即可繼續，不用排到完全正確才能過關。
+    <span class="vi">Có 8 vòng, mỗi vòng kéo 8 ô màu ở giữa xếp theo thứ tự chuyển màu, 2 ô đầu-cuối (viền đen) cố định không di chuyển. Xếp xong bấm "Vòng tiếp theo" để tiếp tục, không cần xếp đúng hoàn toàn.</span>
+  </p>
+  <button id="btn-start">開始測驗<span class="vi" style="color:#dff3f2">Bắt đầu kiểm tra</span></button>
+  <button id="btn-leaderboard" type="button" class="btn-secondary">查看排行榜<span class="vi">Xem bảng xếp hạng</span></button>
   <p id="start-error" class="error-msg"></p>
 </div>
 
 <div id="screen-test" class="screen hidden">
-  <div class="progress">第 <span id="level-num">1</span> / 8 關</div>
+  <div class="progress">
+    <div>第 <span id="level-num">1</span> / 8 關</div>
+    <div class="vi">Vòng <span id="level-num-vi">1</span> / 8</div>
+  </div>
   <div class="tile-row" id="tile-row"></div>
   <button id="btn-next">下一關</button>
 </div>
 
 <div id="screen-leaderboard" class="screen hidden">
   <h1>本月排行榜</h1>
+  <p class="subtitle">Bảng Xếp Hạng Tháng Này</p>
   <div class="tabs">
-    <button id="tab-normal" type="button" class="tab-btn active">一般</button>
-    <button id="tab-hard" type="button" class="tab-btn">困難</button>
+    <button id="tab-normal" type="button" class="tab-btn active">一般<span class="vi">Bình thường</span></button>
+    <button id="tab-hard" type="button" class="tab-btn">困難<span class="vi">Khó</span></button>
   </div>
   <div id="leaderboard-status" class="leaderboard-status"></div>
   <ol id="leaderboard-list" class="leaderboard-list"></ol>
-  <button id="btn-leaderboard-back" type="button">返回</button>
+  <button id="btn-leaderboard-back" type="button" class="btn-secondary">返回<span class="vi">Quay lại</span></button>
 </div>
 
 <div id="screen-result" class="screen hidden">
   <h1>測驗結果</h1>
+  <p class="subtitle">Kết Quả Kiểm Tra</p>
   <div id="result-summary"></div>
-  <button id="btn-copy">複製文字結果</button>
+  <button id="btn-copy">複製文字結果<span class="vi" style="color:#dff3f2">Sao chép kết quả</span></button>
   <p id="copy-status"></p>
-  <button id="btn-restart">重新測試</button>
+  <button id="btn-restart" class="btn-secondary">重新測試<span class="vi">Kiểm tra lại</span></button>
 </div>
 
+</div>
 <script src="logic.js"></script>
 <script>
 (function () {
@@ -124,7 +152,7 @@
   document.getElementById('btn-start').addEventListener('click', function () {
     var name = document.getElementById('input-name').value.trim();
     if (!name) {
-      document.getElementById('start-error').textContent = '請輸入姓名';
+      document.getElementById('start-error').textContent = '請輸入姓名 / Vui lòng nhập họ tên';
       return;
     }
     document.getElementById('start-error').textContent = '';
@@ -147,8 +175,9 @@
 
   function renderLevel() {
     document.getElementById('level-num').textContent = state.levelIndex + 1;
+    document.getElementById('level-num-vi').textContent = state.levelIndex + 1;
     var btn = document.getElementById('btn-next');
-    btn.textContent = state.levelIndex === HT.LEVEL_COUNT - 1 ? '查看結果' : '下一關';
+    btn.textContent = state.levelIndex === HT.LEVEL_COUNT - 1 ? '查看結果 / Xem kết quả' : '下一關 / Vòng tiếp theo';
 
     var level = state.levels[state.levelIndex];
     var diff = HT.DIFFICULTY[state.difficultyKey];
@@ -269,9 +298,9 @@
     textarea.select();
     try {
       document.execCommand('copy');
-      status.textContent = '已複製到剪貼簿';
+      status.textContent = '已複製到剪貼簿 / Đã sao chép';
     } catch (e) {
-      status.textContent = '複製失敗，請手動選取文字複製';
+      status.textContent = '複製失敗，請手動選取文字複製 / Sao chép thất bại, vui lòng chọn văn bản';
     }
     document.body.removeChild(textarea);
   });
@@ -297,17 +326,17 @@
     listEl.innerHTML = '';
 
     if (!GAS_URL || GAS_URL.indexOf('PASTE_') === 0) {
-      statusEl.textContent = '尚未設定排行榜伺服器網址';
+      statusEl.textContent = '尚未設定排行榜伺服器網址 / Chưa cấu hình máy chủ bảng xếp hạng';
       return;
     }
 
-    statusEl.textContent = '載入中...';
+    statusEl.textContent = '載入中... / Đang tải...';
 
     fetch(GAS_URL + '?difficulty=' + difficultyKey)
       .then(function (res) { return res.json(); })
       .then(function (entries) {
         if (!entries.length) {
-          statusEl.textContent = '本月尚無排行榜資料';
+          statusEl.textContent = '本月尚無排行榜資料 / Chưa có dữ liệu tháng này';
           return;
         }
         statusEl.textContent = '';
@@ -338,7 +367,7 @@
         });
       })
       .catch(function () {
-        statusEl.textContent = '無法載入排行榜，請檢查網路連線';
+        statusEl.textContent = '無法載入排行榜，請檢查網路連線 / Không thể tải bảng xếp hạng, kiểm tra mạng';
       });
   }
 
