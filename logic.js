@@ -70,6 +70,53 @@
     }, 0);
   }
 
+  function accumulateZoneErrors(tileErrorGroups) {
+    var zoneErrors = new Array(ZONE_COUNT).fill(0);
+    tileErrorGroups.forEach(function (group) {
+      group.forEach(function (tile) {
+        var zoneIndex = hueToZoneIndex(tile.hue);
+        zoneErrors[zoneIndex] += tile.error;
+      });
+    });
+    return zoneErrors;
+  }
+
+  function getWeakZones(zoneErrors) {
+    var maxError = Math.max.apply(null, zoneErrors);
+    if (maxError <= 0) {
+      return [];
+    }
+    var indexed = zoneErrors.map(function (error, index) {
+      return { index: index, error: error };
+    });
+    indexed.sort(function (a, b) { return b.error - a.error; });
+    var weak = [ZONE_NAMES[indexed[0].index]];
+    if (indexed.length > 1 && indexed[1].error > 0 && indexed[1].error >= maxError * 0.7) {
+      weak.push(ZONE_NAMES[indexed[1].index]);
+    }
+    return weak;
+  }
+
+  function gradeScore(totalScore) {
+    if (totalScore <= 12) return '優良';
+    if (totalScore <= 40) return '正常';
+    if (totalScore <= 90) return '建議留意';
+    return '建議進一步檢查';
+  }
+
+  function formatResultText(params) {
+    var lines = [
+      '色相辨識測試結果',
+      '姓名：' + params.name,
+      '難度：' + params.difficultyLabel,
+      '日期：' + params.dateStr,
+      '總分：' + params.totalScore + ' / ' + MAX_POSSIBLE_SCORE,
+      '弱色區：' + (params.weakZones.length ? params.weakZones.join('、') : '無明顯弱色區'),
+      '建議：' + params.grade
+    ];
+    return lines.join('\n');
+  }
+
   var api = {
     LEVEL_COUNT: LEVEL_COUNT,
     TILES_PER_LEVEL: TILES_PER_LEVEL,
@@ -80,7 +127,11 @@
     hueToZoneIndex: hueToZoneIndex,
     shuffleMovable: shuffleMovable,
     computeTileErrors: computeTileErrors,
-    computeLevelScore: computeLevelScore
+    computeLevelScore: computeLevelScore,
+    accumulateZoneErrors: accumulateZoneErrors,
+    getWeakZones: getWeakZones,
+    gradeScore: gradeScore,
+    formatResultText: formatResultText
   };
 
   if (typeof module !== 'undefined' && module.exports) {
