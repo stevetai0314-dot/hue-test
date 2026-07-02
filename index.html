@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>色相辨識測試</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; margin: 0; padding: 16px; background: #fafafa; color: #222; }
+  .screen.hidden { display: none; }
+  h1 { font-size: 20px; margin-bottom: 12px; }
+  label { display: block; margin-bottom: 8px; }
+  input[type="text"] { width: 100%; padding: 8px; font-size: 16px; }
+  fieldset { margin-bottom: 12px; border: 1px solid #ddd; border-radius: 6px; }
+  .rules { font-size: 13px; color: #666; line-height: 1.6; }
+  button { padding: 10px 20px; font-size: 15px; border: none; border-radius: 6px; background: #333; color: #fff; margin-top: 8px; }
+  .error-msg { color: #c0392b; font-size: 13px; min-height: 18px; }
+  .progress { text-align: center; font-size: 14px; color: #666; margin-bottom: 12px; }
+  .tile-row { display: flex; gap: 4px; overflow-x: auto; padding: 12px 4px; background: #f0f0f0; border-radius: 8px; -webkit-overflow-scrolling: touch; }
+  .tile { min-width: 44px; height: 64px; border-radius: 6px; flex-shrink: 0; }
+  .tile.fixed { border: 3px solid #333; }
+  .tile:not(.fixed) { cursor: grab; touch-action: none; user-select: none; }
+  .tile.dragging { opacity: 0.6; cursor: grabbing; }
+  #result-summary { white-space: pre-line; background: #f0f0f0; padding: 12px; border-radius: 8px; font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+  #copy-status { font-size: 13px; color: #2e7d32; min-height: 18px; }
+</style>
+</head>
+<body>
+
+<div id="screen-start" class="screen">
+  <h1>色相辨識測試</h1>
+  <label>姓名
+    <input type="text" id="input-name" placeholder="請輸入姓名">
+  </label>
+  <fieldset>
+    <legend>難度</legend>
+    <label><input type="radio" name="difficulty" value="normal" checked> 一般</label>
+    <label><input type="radio" name="difficulty" value="hard"> 困難</label>
+  </fieldset>
+  <p class="rules">共 8 關，每關把中間 8 塊色塊依顏色漸層順序拖拉排好，頭尾 2 塊（黑框）固定不動。排完按「下一關」即可繼續，不用排到完全正確才能過關。</p>
+  <button id="btn-start">開始測驗</button>
+  <p id="start-error" class="error-msg"></p>
+</div>
+
+<div id="screen-test" class="screen hidden">
+  <div class="progress">第 <span id="level-num">1</span> / 8 關</div>
+  <div class="tile-row" id="tile-row"></div>
+  <button id="btn-next">下一關</button>
+</div>
+
+<div id="screen-result" class="screen hidden">
+  <h1>測驗結果</h1>
+  <div id="result-summary"></div>
+  <button id="btn-copy">複製文字結果</button>
+  <p id="copy-status"></p>
+  <button id="btn-restart">重新測試</button>
+</div>
+
+<script src="logic.js"></script>
+<script>
+  // App wiring added in Task 5 onward.
+</script>
+</body>
+</html>
