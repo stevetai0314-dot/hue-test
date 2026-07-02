@@ -120,6 +120,59 @@
       tile.dataset.hue = hue;
       row.appendChild(tile);
     });
+
+    attachDragHandlers(row, level);
+  }
+
+  function attachDragHandlers(row, level) {
+    var draggingTile = null;
+
+    function getMovableTiles() {
+      return Array.prototype.slice.call(row.children, 1, HT.TILES_PER_LEVEL - 1);
+    }
+
+    Array.prototype.slice.call(row.children).forEach(function (tile) {
+      if (tile.classList.contains('fixed')) return;
+      tile.addEventListener('pointerdown', function (evt) {
+        draggingTile = tile;
+        tile.setPointerCapture(evt.pointerId);
+        tile.classList.add('dragging');
+      });
+    });
+
+    row.addEventListener('pointermove', function (evt) {
+      if (!draggingTile) return;
+      evt.preventDefault();
+      var x = evt.clientX;
+      var movable = getMovableTiles();
+      for (var i = 0; i < movable.length; i++) {
+        if (movable[i] === draggingTile) continue;
+        var rect = movable[i].getBoundingClientRect();
+        var midpoint = rect.left + rect.width / 2;
+        var isBefore = draggingTile.compareDocumentPosition(movable[i]) & Node.DOCUMENT_POSITION_FOLLOWING;
+        var isAfter = draggingTile.compareDocumentPosition(movable[i]) & Node.DOCUMENT_POSITION_PRECEDING;
+        if (x < midpoint && isBefore) {
+          row.insertBefore(draggingTile, movable[i]);
+          break;
+        }
+        if (x > midpoint && isAfter) {
+          row.insertBefore(draggingTile, movable[i].nextSibling);
+          break;
+        }
+      }
+    });
+
+    function endDrag() {
+      if (!draggingTile) return;
+      draggingTile.classList.remove('dragging');
+      draggingTile = null;
+      level.arrangedHues = Array.prototype.slice.call(row.children).map(function (t) {
+        return Number(t.dataset.hue);
+      });
+    }
+
+    row.addEventListener('pointerup', endDrag);
+    row.addEventListener('pointercancel', endDrag);
   }
 })();
 </script>
