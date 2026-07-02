@@ -35,6 +35,41 @@
     return Math.floor(normalized / ZONE_SPAN) % ZONE_COUNT;
   }
 
+  function shuffleMovable(correctHues, rng) {
+    rng = rng || Math.random;
+    if (correctHues.length !== TILES_PER_LEVEL) {
+      throw new RangeError('correctHues must have ' + TILES_PER_LEVEL + ' entries');
+    }
+    var result = correctHues.slice();
+    var movable = result.slice(1, TILES_PER_LEVEL - 1);
+    for (var i = movable.length - 1; i > 0; i--) {
+      var j = Math.floor(rng() * (i + 1));
+      var tmp = movable[i];
+      movable[i] = movable[j];
+      movable[j] = tmp;
+    }
+    for (var k = 0; k < movable.length; k++) {
+      result[k + 1] = movable[k];
+    }
+    return result;
+  }
+
+  function computeTileErrors(correctHues, arrangedHues) {
+    var errors = [];
+    for (var i = 1; i < TILES_PER_LEVEL - 1; i++) {
+      var hue = arrangedHues[i];
+      var correctIndex = correctHues.indexOf(hue);
+      errors.push({ hue: hue, error: Math.abs(i - correctIndex) });
+    }
+    return errors;
+  }
+
+  function computeLevelScore(correctHues, arrangedHues) {
+    return computeTileErrors(correctHues, arrangedHues).reduce(function (sum, e) {
+      return sum + e.error;
+    }, 0);
+  }
+
   var api = {
     LEVEL_COUNT: LEVEL_COUNT,
     TILES_PER_LEVEL: TILES_PER_LEVEL,
@@ -42,7 +77,10 @@
     DIFFICULTY: DIFFICULTY,
     MAX_POSSIBLE_SCORE: MAX_POSSIBLE_SCORE,
     generateLevelHues: generateLevelHues,
-    hueToZoneIndex: hueToZoneIndex
+    hueToZoneIndex: hueToZoneIndex,
+    shuffleMovable: shuffleMovable,
+    computeTileErrors: computeTileErrors,
+    computeLevelScore: computeLevelScore
   };
 
   if (typeof module !== 'undefined' && module.exports) {
