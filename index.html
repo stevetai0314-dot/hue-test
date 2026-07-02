@@ -60,6 +60,23 @@
 <script>
 (function () {
   var HT = window.HueTest;
+  // Filled in after deploying Code.gs as a Web App (see docs/superpowers/specs/2026-07-02-hue-test-leaderboard-design.md).
+  var GAS_URL = 'PASTE_YOUR_DEPLOYED_GAS_WEB_APP_URL_HERE';
+
+  function submitScore(totalScore) {
+    if (!GAS_URL || GAS_URL.indexOf('PASTE_') === 0) return;
+    var payload = {
+      name: state.name,
+      difficulty: state.difficultyKey,
+      score: totalScore,
+      seconds: state.lastElapsedSeconds,
+      timestamp: new Date().toISOString()
+    };
+    // No explicit Content-Type header: a plain string body defaults to
+    // text/plain, which keeps this a CORS "simple request" (no preflight
+    // OPTIONS call) — Apps Script Web Apps don't handle preflight well.
+    fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) }).catch(function () {});
+  }
 
   var state = {
     name: '',
@@ -215,6 +232,7 @@
     summaryEl.dataset.raw = resultText;
     document.getElementById('copy-status').textContent = '';
     showScreen(screenResult);
+    submitScore(totalScore);
   }
 
   document.getElementById('btn-copy').addEventListener('click', function () {
