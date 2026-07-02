@@ -23,6 +23,16 @@
   .tile.dragging { opacity: 0.6; cursor: grabbing; }
   #result-summary { white-space: pre-line; background: #f0f0f0; padding: 12px; border-radius: 8px; font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
   #copy-status { font-size: 13px; color: #2e7d32; min-height: 18px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+  .tab-btn { flex: 1; background: #ddd; color: #333; }
+  .tab-btn.active { background: #333; color: #fff; }
+  .leaderboard-status { font-size: 13px; color: #666; min-height: 18px; margin-bottom: 8px; }
+  .leaderboard-list { list-style: none; padding: 0; margin: 0; }
+  .leaderboard-list li { display: flex; align-items: center; gap: 8px; padding: 8px; background: #f0f0f0; border-radius: 6px; margin-bottom: 6px; font-size: 14px; }
+  .leaderboard-list li .rank { font-weight: bold; width: 24px; }
+  .leaderboard-list li .name { flex: 1; }
+  .leaderboard-list li .score { width: 50px; text-align: right; }
+  .leaderboard-list li .time { width: 70px; text-align: right; color: #666; }
 </style>
 </head>
 <body>
@@ -39,6 +49,7 @@
   </fieldset>
   <p class="rules">共 8 關，每關把中間 8 塊色塊依顏色漸層順序拖拉排好，頭尾 2 塊（黑框）固定不動。排完按「下一關」即可繼續，不用排到完全正確才能過關。</p>
   <button id="btn-start">開始測驗</button>
+  <button id="btn-leaderboard" type="button">查看排行榜</button>
   <p id="start-error" class="error-msg"></p>
 </div>
 
@@ -46,6 +57,17 @@
   <div class="progress">第 <span id="level-num">1</span> / 8 關</div>
   <div class="tile-row" id="tile-row"></div>
   <button id="btn-next">下一關</button>
+</div>
+
+<div id="screen-leaderboard" class="screen hidden">
+  <h1>本月排行榜</h1>
+  <div class="tabs">
+    <button id="tab-normal" type="button" class="tab-btn active">一般</button>
+    <button id="tab-hard" type="button" class="tab-btn">困難</button>
+  </div>
+  <div id="leaderboard-status" class="leaderboard-status"></div>
+  <ol id="leaderboard-list" class="leaderboard-list"></ol>
+  <button id="btn-leaderboard-back" type="button">返回</button>
 </div>
 
 <div id="screen-result" class="screen hidden">
@@ -91,9 +113,10 @@
   var screenStart = document.getElementById('screen-start');
   var screenTest = document.getElementById('screen-test');
   var screenResult = document.getElementById('screen-result');
+  var screenLeaderboard = document.getElementById('screen-leaderboard');
 
   function showScreen(el) {
-    [screenStart, screenTest, screenResult].forEach(function (s) {
+    [screenStart, screenTest, screenResult, screenLeaderboard].forEach(function (s) {
       s.classList.toggle('hidden', s !== el);
     });
   }
@@ -256,6 +279,83 @@
   document.getElementById('btn-restart').addEventListener('click', function () {
     document.getElementById('input-name').value = '';
     document.getElementById('copy-status').textContent = '';
+    showScreen(screenStart);
+  });
+
+  function formatSeconds(totalSeconds) {
+    var m = Math.floor(totalSeconds / 60);
+    var s = totalSeconds % 60;
+    return m > 0 ? (m + '分' + s + '秒') : (s + '秒');
+  }
+
+  function loadLeaderboard(difficultyKey) {
+    document.getElementById('tab-normal').classList.toggle('active', difficultyKey === 'normal');
+    document.getElementById('tab-hard').classList.toggle('active', difficultyKey === 'hard');
+
+    var statusEl = document.getElementById('leaderboard-status');
+    var listEl = document.getElementById('leaderboard-list');
+    listEl.innerHTML = '';
+
+    if (!GAS_URL || GAS_URL.indexOf('PASTE_') === 0) {
+      statusEl.textContent = '尚未設定排行榜伺服器網址';
+      return;
+    }
+
+    statusEl.textContent = '載入中...';
+
+    fetch(GAS_URL + '?difficulty=' + difficultyKey)
+      .then(function (res) { return res.json(); })
+      .then(function (entries) {
+        if (!entries.length) {
+          statusEl.textContent = '本月尚無排行榜資料';
+          return;
+        }
+        statusEl.textContent = '';
+        entries.forEach(function (entry) {
+          var li = document.createElement('li');
+
+          var rankSpan = document.createElement('span');
+          rankSpan.className = 'rank';
+          rankSpan.textContent = entry.rank;
+
+          var nameSpan = document.createElement('span');
+          nameSpan.className = 'name';
+          nameSpan.textContent = entry.name;
+
+          var scoreSpan = document.createElement('span');
+          scoreSpan.className = 'score';
+          scoreSpan.textContent = entry.score + '分';
+
+          var timeSpan = document.createElement('span');
+          timeSpan.className = 'time';
+          timeSpan.textContent = formatSeconds(entry.seconds);
+
+          li.appendChild(rankSpan);
+          li.appendChild(nameSpan);
+          li.appendChild(scoreSpan);
+          li.appendChild(timeSpan);
+          listEl.appendChild(li);
+        });
+      })
+      .catch(function () {
+        statusEl.textContent = '無法載入排行榜，請檢查網路連線';
+      });
+  }
+
+  document.getElementById('btn-leaderboard').addEventListener('click', function () {
+    showScreen(screenLeaderboard);
+    loadLeaderboard('normal');
+  });
+
+  document.getElementById('tab-normal').addEventListener('click', function () {
+    loadLeaderboard('normal');
+  });
+
+  document.getElementById('tab-hard').addEventListener('click', function () {
+    loadLeaderboard('hard');
+  });
+
+  document.getElementById('btn-leaderboard-back').addEventListener('click', function () {
     showScreen(screenStart);
   });
 })();
