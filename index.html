@@ -33,8 +33,8 @@
   button.btn-secondary { background: #e6edf1; color: #2c3e48; }
   .error-msg { color: #c0392b; font-size: 15px; min-height: 20px; margin-top: 6px; }
   .progress { text-align: center; font-size: 18px; font-weight: 600; color: #1c4e63; margin-bottom: 16px; }
-  .tile-row { display: flex; gap: 8px; overflow-x: auto; padding: 16px 8px; background: #f3f8fa; border-radius: 12px; -webkit-overflow-scrolling: touch; }
-  .tile { min-width: 64px; height: 92px; border-radius: 10px; flex-shrink: 0; }
+  .tile-row { display: flex; flex-direction: column; gap: 8px; padding: 12px; background: #f3f8fa; border-radius: 12px; }
+  .tile { width: 100%; height: 58px; border-radius: 10px; flex-shrink: 0; }
   .tile.fixed { border: 4px solid #24313f; }
   .tile:not(.fixed) { cursor: grab; touch-action: none; user-select: none; box-shadow: 0 2px 5px rgba(0,0,0,0.18); }
   .tile.dragging { opacity: 0.6; cursor: grabbing; }
@@ -299,19 +299,19 @@
     row.addEventListener('pointermove', function (evt) {
       if (!draggingTile) return;
       evt.preventDefault();
-      var x = evt.clientX;
+      var y = evt.clientY;
       var movable = getMovableTiles();
       for (var i = 0; i < movable.length; i++) {
         if (movable[i] === draggingTile) continue;
         var rect = movable[i].getBoundingClientRect();
-        var midpoint = rect.left + rect.width / 2;
+        var midpoint = rect.top + rect.height / 2;
         var followsDraggingTile = draggingTile.compareDocumentPosition(movable[i]) & Node.DOCUMENT_POSITION_FOLLOWING;
         var precedesDraggingTile = draggingTile.compareDocumentPosition(movable[i]) & Node.DOCUMENT_POSITION_PRECEDING;
-        if (x > midpoint && followsDraggingTile) {
+        if (y > midpoint && followsDraggingTile) {
           row.insertBefore(draggingTile, movable[i].nextSibling);
           break;
         }
-        if (x < midpoint && precedesDraggingTile) {
+        if (y < midpoint && precedesDraggingTile) {
           row.insertBefore(draggingTile, movable[i]);
           break;
         }
