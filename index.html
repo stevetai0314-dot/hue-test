@@ -66,7 +66,9 @@
     difficultyKey: 'normal',
     levelIndex: 0,
     levels: [],
-    tileErrorGroups: []
+    tileErrorGroups: [],
+    startTime: 0,
+    lastElapsedSeconds: 0
   };
 
   var screenStart = document.getElementById('screen-start');
@@ -93,6 +95,7 @@
     state.levelIndex = 0;
     state.levels = [];
     state.tileErrorGroups = [];
+    state.startTime = Date.now();
     for (var i = 0; i < HT.LEVEL_COUNT; i++) {
       var correctHues = HT.generateLevelHues(i);
       state.levels.push({ correctHues: correctHues, arrangedHues: HT.shuffleMovable(correctHues) });
@@ -189,6 +192,7 @@
   });
 
   function showResults() {
+    state.lastElapsedSeconds = Math.max(0, Math.round((Date.now() - state.startTime) / 1000));
     var totalScore = state.tileErrorGroups.reduce(function (sum, group) {
       return sum + group.reduce(function (s, t) { return s + t.error; }, 0);
     }, 0);
