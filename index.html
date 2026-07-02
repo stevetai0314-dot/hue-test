@@ -149,14 +149,14 @@
         if (movable[i] === draggingTile) continue;
         var rect = movable[i].getBoundingClientRect();
         var midpoint = rect.left + rect.width / 2;
-        var isBefore = draggingTile.compareDocumentPosition(movable[i]) & Node.DOCUMENT_POSITION_FOLLOWING;
-        var isAfter = draggingTile.compareDocumentPosition(movable[i]) & Node.DOCUMENT_POSITION_PRECEDING;
-        if (x < midpoint && isBefore) {
-          row.insertBefore(draggingTile, movable[i]);
+        var followsDraggingTile = draggingTile.compareDocumentPosition(movable[i]) & Node.DOCUMENT_POSITION_FOLLOWING;
+        var precedesDraggingTile = draggingTile.compareDocumentPosition(movable[i]) & Node.DOCUMENT_POSITION_PRECEDING;
+        if (x > midpoint && followsDraggingTile) {
+          row.insertBefore(draggingTile, movable[i].nextSibling);
           break;
         }
-        if (x > midpoint && isAfter) {
-          row.insertBefore(draggingTile, movable[i].nextSibling);
+        if (x < midpoint && precedesDraggingTile) {
+          row.insertBefore(draggingTile, movable[i]);
           break;
         }
       }
