@@ -199,14 +199,16 @@
     applyLanguage();
   });
 
-  function submitScore(totalScore) {
+  function submitScore(totalScore, weakZones, grade) {
     if (!GAS_URL || GAS_URL.indexOf('PASTE_') === 0) return;
     var payload = {
       name: state.name,
       difficulty: state.difficultyKey,
       score: totalScore,
       seconds: state.lastElapsedSeconds,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      weakZones: weakZones,
+      grade: grade
     };
     // No explicit Content-Type header: a plain string body defaults to
     // text/plain, which keeps this a CORS "simple request" (no preflight
@@ -368,7 +370,7 @@
     summaryEl.dataset.raw = resultText;
     document.getElementById('copy-status').textContent = '';
     showScreen(screenResult);
-    submitScore(totalScore);
+    submitScore(totalScore, weakZones, grade);
   }
 
   document.getElementById('btn-copy').addEventListener('click', function () {

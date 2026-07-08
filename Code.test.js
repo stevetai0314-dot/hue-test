@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { computeLeaderboard, monthKeyOf, currentMonthKey } = require('./Code.gs');
+const { computeLeaderboard, monthKeyOf, currentMonthKey, buildRecordRow } = require('./Code.gs');
 
 test('currentMonthKey: formats a given date as YYYY-MM', () => {
   assert.equal(currentMonthKey(new Date('2026-07-15T00:00:00Z')), '2026-07');
@@ -42,4 +42,41 @@ test('computeLeaderboard: truncates to the top 10 entries', () => {
   assert.equal(result[0].name, 'P0');
   assert.equal(result[9].name, 'P9');
   assert.deepEqual(result.map((r) => r.rank), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+});
+
+test('buildRecordRow: joins weakZones array with 、 and includes grade', () => {
+  const row = buildRecordRow({
+    name: 'OLIVIA',
+    difficulty: 'hard',
+    score: 6,
+    seconds: 42,
+    timestamp: '2026-07-08T09:13:16.000Z',
+    weakZones: ['綠'],
+    grade: '優良'
+  });
+  assert.deepEqual(row, ['2026-07-08T09:13:16.000Z', 'OLIVIA', 'hard', 6, 42, '綠', '優良']);
+});
+
+test('buildRecordRow: falls back to 無明顯弱色區 when weakZones is empty', () => {
+  const row = buildRecordRow({
+    name: 'A',
+    difficulty: 'normal',
+    score: 0,
+    seconds: 10,
+    timestamp: '2026-07-08T00:00:00.000Z',
+    weakZones: [],
+    grade: '優良'
+  });
+  assert.deepEqual(row, ['2026-07-08T00:00:00.000Z', 'A', 'normal', 0, 10, '無明顯弱色區', '優良']);
+});
+
+test('buildRecordRow: defaults weakZones and grade to empty string when absent', () => {
+  const row = buildRecordRow({
+    name: 'A',
+    difficulty: 'normal',
+    score: 0,
+    seconds: 10,
+    timestamp: '2026-07-08T00:00:00.000Z'
+  });
+  assert.deepEqual(row, ['2026-07-08T00:00:00.000Z', 'A', 'normal', 0, 10, '', '']);
 });

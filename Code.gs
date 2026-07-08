@@ -46,25 +46,38 @@ function getOrCreateSheet() {
   var sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
-    sheet.appendRow(['提交時間戳記', '姓名', '難度', '分數', '秒數']);
+    sheet.appendRow(['提交時間戳記', '姓名', '難度', '分數', '秒數', '弱色區', '建議']);
   }
   return sheet;
 }
 
-function doPost(e) {
-  var data = JSON.parse(e.postData.contents);
+function buildRecordRow(data) {
   var name = String(data.name || '').trim().slice(0, 50);
   var difficulty = (data.difficulty === 'hard') ? 'hard' : 'normal';
   var score = Number(data.score);
   var seconds = Number(data.seconds);
   var timestamp = String(data.timestamp || new Date().toISOString());
+  var weakZones = Array.isArray(data.weakZones)
+    ? (data.weakZones.length ? data.weakZones.join('、') : '無明顯弱色區')
+    : String(data.weakZones || '');
+  var grade = String(data.grade || '');
+
+  return [timestamp, name, difficulty, score, seconds, weakZones, grade];
+}
+
+function doPost(e) {
+  var data = JSON.parse(e.postData.contents);
+  var row = buildRecordRow(data);
+  var name = row[1];
+  var score = row[3];
+  var seconds = row[4];
 
   if (!name || isNaN(score) || isNaN(seconds)) {
     return ContentService.createTextOutput(JSON.stringify({ ok: false, error: 'invalid payload' }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 
-  getOrCreateSheet().appendRow([timestamp, name, difficulty, score, seconds]);
+  getOrCreateSheet().appendRow(row);
   return ContentService.createTextOutput(JSON.stringify({ ok: true })).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -94,6 +107,7 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     computeLeaderboard: computeLeaderboard,
     monthKeyOf: monthKeyOf,
-    currentMonthKey: currentMonthKey
+    currentMonthKey: currentMonthKey,
+    buildRecordRow: buildRecordRow
   };
 }
